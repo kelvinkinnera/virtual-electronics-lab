@@ -1,0 +1,628 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Electronics Lab</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f0f4f8;
+  color: #1e293b;
+}
+
+header {
+  background: #123b65;
+  color: white;
+  text-align: center;
+  padding: 28px 12px;
+}
+
+nav {
+  background: #0b2545;
+  padding: 15px;
+  text-align: center;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin: 8px;
+  display: inline-block;
+}
+
+main {
+  max-width: 900px;
+  margin: 25px auto;
+  padding: 0 15px;
+}
+
+.card {
+  background: white;
+  padding: 22px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px #00000012;
+}
+
+input, select, button {
+  padding: 11px;
+  margin: 5px 0;
+  max-width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+input { width: 100%; }
+
+button {
+  background: #087e8b;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover { background: #06636d; }
+
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.result {
+  background: #e0f2fe;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-wrap: anywhere;
+}
+
+#aiAnswer {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+footer {
+  background: #123b65;
+  color: white;
+  text-align: center;
+  padding: 16px;
+}
+
+html{scroll-behavior:smooth}body{line-height:1.6;background:linear-gradient(180deg,#eef5fb,#f8fafc)}
+header{background:linear-gradient(135deg,#123b65,#087e8b);padding:38px 16px}
+nav{position:sticky;top:0;z-index:10;box-shadow:0 3px 12px #0b254522}
+nav a{padding:7px 10px;border-radius:7px}nav a:hover{background:#ffffff22}
+main{max-width:1050px}.card{border:1px solid #e2e8f0}
+h2{color:#123b65}h3{color:#087e8b}
+.diagram-wrap{overflow-x:auto;background:#f8fafc;border:1px solid #dbeafe;border-radius:12px;padding:12px}
+.circuit-svg{display:block;width:100%;min-width:520px;max-height:260px}
+.component-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.component-panel{background:#f8fafc;border:1px solid #dbeafe;padding:16px;border-radius:10px}
+.experiment{border-left:4px solid #087e8b;padding:14px 16px;margin:14px 0;background:#f8fafc;border-radius:0 10px 10px 0}
+.led-indicator{transition:background .15s,box-shadow .15s}
+@media(max-width:600px){header{padding:28px 14px}nav{padding:8px}nav a{margin:3px}.card{padding:17px}}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Virtual Electronics Lab</h1>
+  <p>Learn Electronics. Explore Circuits. Discover AI.</p>
+</header>
+
+<nav>
+  <a href="#home">Home</a>
+  <a href="#learn">Learn</a>
+  <a href="#ohm">Ohm's Law</a>
+  <a href="#resistor">Resistors</a>
+  <a href="#circuit">Circuit Lab</a>
+  <a href="#experiments">Experiments</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#ai">AI Tutor</a>
+</nav>
+
+<main>
+
+<section class="card" id="home">
+  <h2>Welcome to Our Lab!</h2>
+  <p>Learn electronics through simple explanations, calculators and quizzes.</p>
+  <p>Created by Kelvin Kinnera</p>
+</section>
+
+<section class="card" id="learn">
+  <h2>Learn Electronics</h2>
+  <h3>What is Electronics?</h3>
+  <p>Electronics is the study of circuits and components that control electric current.</p>
+  <h3>Ohm's Law</h3>
+  <p>Voltage = Current × Resistance (V = I × R)</p>
+  <p>Voltage is measured in volts, current in amperes and resistance in ohms.</p>
+</section>
+
+<section class="card" id="ohm">
+  <h2>Ohm's Law Calculator</h2>
+  <p>Enter any two values to calculate the third. Use positive numbers only.</p>
+
+  <label for="voltage">Voltage (V)</label>
+  <input id="voltage" type="number" min="0" step="any" placeholder="Leave blank if unknown">
+
+  <label for="current">Current (A)</label>
+  <input id="current" type="number" min="0" step="any" placeholder="Leave blank if unknown">
+
+  <label for="resistance">Resistance (Ω)</label>
+  <input id="resistance" type="number" min="0" step="any" placeholder="Leave blank if unknown">
+
+  <button type="button" onclick="calculateOhm()">Calculate</button>
+  <button type="button" onclick="clearOhm()">Clear</button>
+
+  <p class="result" id="ohmResult" aria-live="polite">Your answer will appear here.</p>
+</section>
+
+<section class="card" id="resistor">
+  <h2>4-Band Resistor Colour Code</h2>
+  <p>Select the first two digits, multiplier and tolerance band.</p>
+
+  <label for="band1">First band</label>
+  <select id="band1"></select>
+
+  <label for="band2">Second band</label>
+  <select id="band2"></select>
+
+  <label for="multiplier">Multiplier band</label>
+  <select id="multiplier"></select>
+
+  <label for="tolerance">Tolerance band</label>
+  <select id="tolerance">
+    <option value="1">Brown — ±1%</option>
+    <option value="2">Red — ±2%</option>
+    <option value="5">Gold — ±5%</option>
+    <option value="10">Silver — ±10%</option>
+  </select>
+
+  <button type="button" onclick="calculateResistor()">Calculate Resistance</button>
+  <p class="result" id="resistorResult" aria-live="polite">Your resistor value will appear here.</p>
+</section>
+
+<section class="card" id="quiz">
+  <h2>Basic Electronics Quiz</h2>
+  <p id="question">1. What is the unit of electrical resistance?</p>
+  <div id="answers"></div>
+  <p id="quizResult" aria-live="polite"></p>
+  <button type="button" id="next" onclick="nextQuestion()" hidden>Next Question</button>
+</section>
+
+<section class="card" id="ai">
+  <h2>AI Electronics Tutor</h2>
+  <p>Ask questions about electronics and ECE. Get explanations from your local AI model.</p>
+
+  <form id="aiForm">
+    <label for="aiQuestion">Enter your question:</label>
+    <input
+      id="aiQuestion"
+      type="text"
+      placeholder="Example: Explain Ohm's law"
+      maxlength="4000"
+      required
+    >
+    <button id="aiAskButton" type="submit">Ask AI</button>
+  </form>
+
+  <p id="aiStatus" aria-live="polite">Ready to answer your questions.</p>
+  <div id="aiAnswer" class="result" aria-live="polite" hidden></div>
+</section>
+
+<section class="card" id="circuit">
+  <h2>Virtual Circuit Simulator</h2>
+  <p>Explore a simple series circuit. Change the battery and resistor, then start the simulation.</p>
+<div class="diagram-wrap">
+<svg class="circuit-svg" viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Battery, switch, resistor and red LED connected in series">
+<title>Battery, switch, resistor and LED circuit diagram</title>
+<g fill="none" stroke="#334155" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+<path d="M95 70 H185 M245 70 H315 M385 70 H485 M545 70 H620 V175 H95 V70"/>
+<path d="M95 105 V145 M80 115 H110 M85 135 H105"/><path d="M185 70 L225 48"/>
+<rect x="315" y="52" width="70" height="36" rx="4" fill="#fef3c7" stroke="#b45309"/>
+<circle cx="515" cy="70" r="24" fill="#fee2e2" stroke="#dc2626"/>
+<path d="M502 57 L528 83 M528 57 L502 83" stroke="#dc2626" stroke-width="3"/>
+</g><g fill="#0f172a" font-size="16" font-family="Arial,sans-serif" text-anchor="middle">
+<text x="95" y="35">Battery</text><text x="215" y="35">Switch</text><text x="350" y="35">Resistor</text><text x="515" y="35">Red LED</text>
+<text x="95" y="166" font-size="13">+</text><text x="95" y="190" font-size="13">−</text></g></svg></div>
+<p><strong>Learning model:</strong> LED current is estimated using a simplified 2 V LED model.</p>
+
+  <label for="circuitVoltage">Battery Voltage:</label>
+  <select id="circuitVoltage">
+    <option value="3">3 V</option>
+    <option value="5" selected>5 V</option>
+    <option value="9">9 V</option>
+    <option value="12">12 V</option>
+  </select>
+
+  <br><br>
+
+  <label for="circuitResistor">Resistor:</label>
+  <select id="circuitResistor">
+    <option value="220">220 ohms</option>
+    <option value="330" selected>330 ohms</option>
+    <option value="470">470 ohms</option>
+    <option value="1000">1000 ohms</option>
+  </select>
+
+  <div style="text-align:center; padding:20px;">
+    <div id="circuitLed"
+      class="led-indicator" style="width:40px;height:40px;border-radius:50%;
+      background:#555;margin:auto;border:3px solid #999;">
+    </div>
+
+    <p id="circuitStatus">LED is OFF</p>
+    <p id="circuitCurrent">Current: 0 mA</p>
+  </div>
+
+  <button type="button" onclick="startCircuit()">
+    Start / Blink LED
+  </button>
+
+  <button type="button" onclick="stopCircuit()">
+    Stop LED
+  </button>
+
+<div class="component-grid">
+ <div class="component-panel">
+  <h3>Switch demonstration</h3><p>A switch opens or closes a circuit path.</p>
+  <button type="button" id="switchDemoButton" aria-pressed="false" onclick="toggleSwitchDemo()">Close Switch</button>
+  <p id="switchDemoStatus" aria-live="polite">Switch is OPEN — circuit path is broken.</p>
+  <svg viewBox="0 0 300 65" width="100%" role="img" aria-label="Switch diagram">
+   <path d="M15 35 H90 M150 35 H285" stroke="#334155" stroke-width="4" fill="none"/>
+   <circle cx="90" cy="35" r="5" fill="#087e8b"/><circle cx="150" cy="35" r="5" fill="#087e8b"/>
+   <path id="switchBlade" d="M90 35 L135 12" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/>
+  </svg>
+ </div>
+ <div class="component-panel">
+  <h3>Capacitor demonstration</h3><p>Explore charge storage with a simplified visual model.</p>
+  <label for="capacitance">Capacitance:</label>
+  <select id="capacitance"><option value="100">100 µF</option><option value="470" selected>470 µF</option><option value="1000">1000 µF</option></select><br>
+  <button type="button" onclick="chargeCapacitor()">Charge</button>
+  <button type="button" onclick="dischargeCapacitor()">Discharge</button>
+  <p id="capacitorStatus" aria-live="polite">Capacitor is discharged (0%).</p>
+  <div style="height:14px;background:#e2e8f0;border-radius:99px;overflow:hidden"><div id="capacitorBar" style="height:14px;width:0%;background:#087e8b;transition:width .4s"></div></div>
+ </div>
+</div>
+
+</section>
+
+<section class="card" id="experiments">
+<h2>Practical Electronics Experiments</h2>
+<p>Beginner-friendly experiment notes. Use low-voltage educational kits and follow your lecturer's safety instructions.</p>
+<article class="experiment"><h3>Experiment 1: Verify Ohm's Law</h3>
+<p><strong>Aim:</strong> Observe the relationship between voltage, current and resistance.</p>
+<p><strong>Components:</strong> Low-voltage DC source, resistor, multimeter and wires.</p>
+<p><strong>Procedure:</strong> Connect the resistor to the approved low-voltage source. Measure voltage across it and current through it. Repeat only with lecturer-approved settings.</p>
+<p><strong>Expected result:</strong> For a fixed resistor, current increases as voltage increases.</p></article>
+<article class="experiment"><h3>Experiment 2: LED with a Series Resistor</h3>
+<p><strong>Aim:</strong> Learn why an LED needs a current-limiting resistor.</p>
+<p><strong>Components:</strong> LED, suitable resistor, low-voltage source, breadboard and wires.</p>
+<p><strong>Procedure:</strong> With power disconnected, identify LED polarity and connect it in series with a suitable resistor. Ask your lecturer to check connections before applying power.</p>
+<p><strong>Expected result:</strong> The LED lights with correct polarity and a suitable resistor.</p></article>
+<article class="experiment"><h3>Experiment 3: Capacitor Charging</h3>
+<p><strong>Aim:</strong> Understand that a capacitor stores charge.</p>
+<p><strong>Components:</strong> Lecturer-approved low-voltage RC learning circuit and rated capacitor.</p>
+<p><strong>Procedure:</strong> Observe capacitor voltage during charging. Disconnect power and discharge it using the approved method before handling. Never short a capacitor directly.</p>
+<p><strong>Expected result:</strong> Capacitor voltage rises gradually during charging.</p></article>
+</section>
+
+</main>
+
+<footer>
+  <p>Virtual Electronics Lab | Student Project 2026</p>
+</footer>
+
+<script>
+function calculateOhm() {
+  const fields = ["voltage", "current", "resistance"];
+  const values = fields.map(id =>
+    document.getElementById(id).value.trim()
+  );
+  const count = values.filter(v => v !== "").length;
+  const out = document.getElementById("ohmResult");
+
+  if (count !== 2) {
+    out.textContent = "Please enter exactly two values.";
+    return;
+  }
+
+  const nums = values.map(v => v === "" ? null : Number(v));
+
+  if (nums.some(v => v !== null && (!Number.isFinite(v) || v <= 0))) {
+    out.textContent = "Please enter positive numbers greater than zero.";
+    return;
+  }
+
+  let answer;
+
+  if (nums[0] === null) {
+    answer = nums[1] * nums[2];
+    out.textContent = "Voltage = Current × Resistance = " + answer + " V";
+  } else if (nums[1] === null) {
+    answer = nums[0] / nums[2];
+    out.textContent = "Current = Voltage ÷ Resistance = " + answer + " A";
+  } else {
+    answer = nums[0] / nums[1];
+    out.textContent = "Resistance = Voltage ÷ Current = " + answer + " Ω";
+  }
+}
+
+function clearOhm() {
+  ["voltage", "current", "resistance"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+
+  document.getElementById("ohmResult").textContent =
+    "Your answer will appear here.";
+}
+
+const colours = [
+  ["Black", 0, 1],
+  ["Brown", 1, 10],
+  ["Red", 2, 100],
+  ["Orange", 3, 1000],
+  ["Yellow", 4, 10000],
+  ["Green", 5, 100000],
+  ["Blue", 6, 1000000],
+  ["Violet", 7, 10000000],
+  ["Grey", 8, 100000000],
+  ["White", 9, 1000000000]
+];
+
+function fillColours(id, multiplierMode = false) {
+  const select = document.getElementById(id);
+
+  colours.forEach(c => {
+    if (!multiplierMode && c[0] === "Black" && id !== "band2") {
+      return;
+    }
+
+    const opt = document.createElement("option");
+    opt.value = multiplierMode ? c[2] : c[1];
+    opt.textContent = c[0];
+    select.appendChild(opt);
+  });
+
+  if (multiplierMode) {
+    const gold = document.createElement("option");
+    gold.value = "0.1";
+    gold.textContent = "Gold (×0.1)";
+    select.appendChild(gold);
+
+    const silver = document.createElement("option");
+    silver.value = "0.01";
+    silver.textContent = "Silver (×0.01)";
+    select.appendChild(silver);
+  }
+}
+
+fillColours("band1");
+fillColours("band2");
+fillColours("multiplier", true);
+
+function calculateResistor() {
+  const a = Number(document.getElementById("band1").value);
+  const b = Number(document.getElementById("band2").value);
+  const m = Number(document.getElementById("multiplier").value);
+  const t = Number(document.getElementById("tolerance").value);
+
+  const ohms = (10 * a + b) * m;
+  let value = ohms + " Ω";
+
+  if (ohms >= 1000000) {
+    value = (ohms / 1000000) + " MΩ";
+  } else if (ohms >= 1000) {
+    value = (ohms / 1000) + " kΩ";
+  }
+
+  document.getElementById("resistorResult").textContent =
+    "Resistance = " + value + " ±" + t + "%";
+}
+
+const questions = [
+  {
+    q: "1. What is the unit of electrical resistance?",
+    a: ["Volt", "Ohm", "Ampere"],
+    correct: 1
+  },
+  {
+    q: "2. What is the unit of electric current?",
+    a: ["Ampere", "Ohm", "Watt"],
+    correct: 0
+  },
+  {
+    q: "3. Which component emits light?",
+    a: ["Resistor", "LED", "Switch"],
+    correct: 1
+  },
+  {
+    q: "4. What is the unit of voltage?",
+    a: ["Ohm", "Ampere", "Volt"],
+    correct: 2
+  },
+  {
+    q: "5. Which law states V = I × R?",
+    a: ["Ohm's law", "Newton's law", "Faraday's law"],
+    correct: 0
+  }
+];
+
+let qIndex = 0;
+let score = 0;
+let answered = false;
+
+function showQuestion() {
+  document.getElementById("question").textContent = questions[qIndex].q;
+
+  const area = document.getElementById("answers");
+  area.innerHTML = "";
+
+  questions[qIndex].a.forEach((option, i) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = option;
+    btn.onclick = () => answer(i);
+    area.appendChild(btn);
+  });
+
+  document.getElementById("quizResult").textContent = "";
+  document.getElementById("next").hidden = true;
+  document.getElementById("next").textContent = "Next Question";
+  answered = false;
+}
+
+function answer(choice) {
+  if (answered) return;
+
+  answered = true;
+
+  if (choice === questions[qIndex].correct) {
+    score++;
+    document.getElementById("quizResult").textContent =
+      "Correct! Score: " + score;
+  } else {
+    document.getElementById("quizResult").textContent =
+      "Not quite. Correct answer: " +
+      questions[qIndex].a[questions[qIndex].correct];
+  }
+
+  document.getElementById("next").hidden = false;
+}
+
+function nextQuestion() {
+  if (qIndex >= questions.length - 1) {
+    document.getElementById("question").textContent =
+      "Quiz completed! Your score: " + score + " / " + questions.length;
+
+    document.getElementById("answers").innerHTML = "";
+    document.getElementById("quizResult").textContent =
+      "Well done! Click Restart Quiz to try again.";
+
+    const next = document.getElementById("next");
+    next.textContent = "Restart Quiz";
+    next.onclick = restartQuiz;
+    next.hidden = false;
+    return;
+  }
+
+  qIndex++;
+  showQuestion();
+}
+
+function restartQuiz() {
+  qIndex = 0;
+  score = 0;
+  answered = false;
+
+  const next = document.getElementById("next");
+  next.textContent = "Next Question";
+  next.onclick = nextQuestion;
+
+  showQuestion();
+}
+
+showQuestion();
+
+// AI ELECTRONICS TUTOR
+document.getElementById("aiForm").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const question = document.getElementById("aiQuestion").value.trim();
+  const button = document.getElementById("aiAskButton");
+  const status = document.getElementById("aiStatus");
+  const answerBox = document.getElementById("aiAnswer");
+
+  if (!question) return;
+
+  button.disabled = true;
+  status.textContent = "AI is thinking. Please wait...";
+  answerBox.hidden = true;
+  answerBox.textContent = "";
+
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: question })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "The AI request failed.");
+    }
+
+    answerBox.textContent = data.answer || "No answer was returned.";
+    answerBox.hidden = false;
+    status.textContent = "Answer received.";
+  } catch (error) {
+    status.textContent =
+      "Could not connect to AI. Make sure the Node server and Ollama are running.";
+    console.error("AI Tutor error:", error);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+// Virtual Circuit Simulator and component demonstrations
+let circuitTimer = null, circuitOn = false;
+function startCircuit() {
+  stopCircuit();
+  const voltage = Number(document.getElementById("circuitVoltage").value);
+  const resistance = Number(document.getElementById("circuitResistor").value);
+  const current = Math.max(0, (voltage - 2) / resistance * 1000);
+  document.getElementById("circuitCurrent").textContent = "Estimated current: " + current.toFixed(2) + " mA";
+  if (voltage <= 2) { document.getElementById("circuitStatus").textContent = "Voltage too low for this LED model"; return; }
+  document.getElementById("circuitStatus").textContent = "Red LED is blinking";
+  circuitTimer = setInterval(function() {
+    circuitOn = !circuitOn;
+    const led = document.getElementById("circuitLed");
+    led.style.background = circuitOn ? "#ff0000" : "#555";
+    led.style.boxShadow = circuitOn ? "0 0 20px #ff0000" : "none";
+  }, 500);
+}
+function stopCircuit() {
+  if (circuitTimer !== null) { clearInterval(circuitTimer); circuitTimer = null; }
+  circuitOn = false;
+  const led = document.getElementById("circuitLed");
+  if (led) { led.style.background = "#555"; led.style.boxShadow = "none"; }
+  const status = document.getElementById("circuitStatus");
+  if (status) status.textContent = "LED is OFF";
+}
+let switchDemoClosed = false;
+function toggleSwitchDemo() {
+  switchDemoClosed = !switchDemoClosed;
+  document.getElementById("switchDemoButton").textContent = switchDemoClosed ? "Open Switch" : "Close Switch";
+  document.getElementById("switchDemoButton").setAttribute("aria-pressed", String(switchDemoClosed));
+  document.getElementById("switchDemoStatus").textContent = switchDemoClosed ? "Switch is CLOSED — circuit path is connected." : "Switch is OPEN — circuit path is broken.";
+  document.getElementById("switchBlade").setAttribute("d", switchDemoClosed ? "M90 35 L150 35" : "M90 35 L135 12");
+  document.getElementById("switchBlade").setAttribute("stroke", switchDemoClosed ? "#16a34a" : "#dc2626");
+}
+function chargeCapacitor() {
+  const value = Number(document.getElementById("capacitance").value);
+  document.getElementById("capacitorBar").style.width = "100%";
+  document.getElementById("capacitorStatus").textContent = "Illustration: " + value + " µF capacitor charged (100%).";
+}
+function dischargeCapacitor() {
+  document.getElementById("capacitorBar").style.width = "0%";
+  document.getElementById("capacitorStatus").textContent = "Illustration: capacitor discharged (0%).";
+}
+
+</script>
+
+
+
+
+</body>
+</html>
